@@ -40,14 +40,21 @@ type Functionary struct {
 
 // +kubebuilder:object:generate=true
 type Attestation struct {
-	Type         string       `json:"type"`
-	RegoPolicies []RegoPolicy `json:"regopolicies"`
+	Type          string         `json:"type"`
+	SubjectScopes []SubjectScope `json:"subjectscopes"`
+	RegoPolicies  []RegoPolicy   `json:"regopolicies"`
 }
 
 // +kubebuilder:object:generate=true
 type RegoPolicy struct {
 	Module []byte `json:"module"`
 	Name   string `json:"name"`
+}
+
+// +kubebuilder:object:generate=true
+type SubjectScope struct {
+	Subject string `json:"subject"`
+	Scope   string `json:"scope"`
 }
 
 // StepResult contains information about the verified collections for each step.

@@ -36,6 +36,8 @@ const PolicyPredicate = "https://witness.testifysec.com/policy/v0.1"
 // +kubebuilder:object:generate=true
 type Policy struct {
 	Expires              metav1.Time          `json:"expires"`
+	Name                 string               `json:"name"`
+	Repositories         []Repository         `json:"repositories,omitempty"`
 	Roots                map[string]Root      `json:"roots,omitempty"`
 	TimestampAuthorities map[string]Root      `json:"timestampauthorities,omitempty"`
 	PublicKeys           map[string]PublicKey `json:"publickeys,omitempty"`
@@ -46,6 +48,11 @@ type Policy struct {
 type Root struct {
 	Certificate   []byte   `json:"certificate"`
 	Intermediates [][]byte `json:"intermediates,omitempty"`
+}
+
+type Repository struct {
+	Url     string `json:"url"`
+	Project string `json:"project"`
 }
 
 // +kubebuilder:object:generate=true

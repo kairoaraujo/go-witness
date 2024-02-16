@@ -21,6 +21,7 @@ require (
 	github.com/sigstore/fulcio v1.4.4
 	github.com/spiffe/go-spiffe/v2 v2.1.7
 	github.com/stretchr/testify v1.8.4
+	github.com/theupdateframework/go-tuf/v2 v2.0.0-20240223092044-1e7978e83f63
 	go.step.sm/crypto v0.43.1
 	golang.org/x/sys v0.17.0
 	google.golang.org/api v0.167.0

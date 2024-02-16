@@ -16,8 +16,12 @@ package source
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/in-toto/go-witness/archivista"
+	"github.com/in-toto/go-witness/dsse"
+	"github.com/theupdateframework/go-tuf/v2/metadata"
+	"github.com/theupdateframework/go-tuf/v2/metadata/updater"
 )
 
 type ArchivistaSource struct {
@@ -61,4 +65,45 @@ func (s *ArchivistaSource) Search(ctx context.Context, collectionName string, su
 	}
 
 	return envelopes, nil
+}
+
+// return the collection envelope for the policies
+func (s *ArchivistaSource) SearchPoliciesBySubjectsName(ctx context.Context, subjects, scopes []string, archivistaURL string, tufUpdater *updater.Updater) ([]dsse.Envelope, error) {
+	policies, err := s.client.SearchPolicyBySubjects(
+		ctx, archivista.SearchGitoidVariables{Subjects: subjects, Scopes: scopes},
+	)
+
+	var policyEnvelopes []dsse.Envelope
+	var policyEnvelope dsse.Envelope
+	if err != nil {
+		return nil, err
+	}
+	for _, policyName := range policies {
+		policyTufInfo, err := tufUpdater.GetTargetInfo("policy/" + policyName)
+		if err != nil {
+			return nil, err
+		}
+
+		// Get the policy gioid from unique policy name
+		policyData := &metadata.TargetFiles{}
+		_ = json.Unmarshal(*policyTufInfo.Custom, policyData)
+		policyGiod := policyData.UnrecognizedFields["gitoid"].(string)
+
+		policyGiodInfo, err := tufUpdater.GetTargetInfo(policyGiod)
+		if err != nil {
+			return nil, err
+		}
+		_, p, err := tufUpdater.DownloadTarget(policyGiodInfo, "", archivistaURL+"/download")
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(p, &policyEnvelope)
+		if err != nil {
+			return nil, err
+		}
+
+		policyEnvelopes = append(policyEnvelopes, policyEnvelope)
+	}
+
+	return policyEnvelopes, nil
 }
